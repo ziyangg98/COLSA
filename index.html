@@ -71,9 +71,7 @@
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://gongziyang.com/COLSA/">COLSA</a></span><span class="op">)</span></span></code></pre></div>
 <p>In the simulation study, we considered two continuous and two categorical covariates. The continuous covariates were independently generated from a bivariate normal distribution. The first categorical covariate was simulated from a Bernoulli distribution, while the second categorical covariate, comprising four levels, was drawn from a multinomial distribution whose probability mass function depended on the levels of the first categorical variable.</p>
 <p>Event times were generated from a mixture of Weibull distributions, with shape parameters 3 and 5 and scale parameters 10 and 20, respectively. Censoring times followed an exponential distribution with rate parameter 3. The observed event times were subject to right censoring. The true regression coefficients were set as</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝛃</mi><mo>=</mo><msup><mrow><mo stretchy="true" form="prefix">(</mo><mn>0.15</mn><mo>,</mo><mo>−</mo><mn>0.15</mn><mo>,</mo><mn>0.3</mn><mo>,</mo><mn>0.3</mn><mo>,</mo><mn>0.3</mn><mo>,</mo><mn>0.3</mn><mo stretchy="true" form="postfix">)</mo></mrow><mi>⊤</mi></msup></mrow><annotation encoding="application/x-tex">
-  \boldsymbol{\beta} = (0.15, -0.15, 0.3, 0.3, 0.3, 0.3)^{\top}
-</annotation></semantics></math></p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝛃</mi><mo>=</mo><msup><mrow><mo stretchy="true" form="prefix">(</mo><mn>0.15</mn><mo>,</mo><mo>−</mo><mn>0.15</mn><mo>,</mo><mn>0.3</mn><mo>,</mo><mn>0.3</mn><mo>,</mo><mn>0.3</mn><mo>,</mo><mn>0.3</mn><mo stretchy="true" form="postfix">)</mo></mrow><mi>⊤</mi></msup></mrow><annotation encoding="application/x-tex">  \boldsymbol{\beta} = (0.15, -0.15, 0.3, 0.3, 0.3, 0.3)^{\top}</annotation></semantics></math></p>
 <p>A total of six datasets were generated: the first three containing 1,500 observations each, and the remaining three containing 500 observations each. The complete dataset was randomly partitioned into these six groups.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">sim</span><span class="op">)</span></span>
@@ -120,21 +118,21 @@
 <span><span class="co">#&gt; Number of basis functions:  5 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;         coef exp(coef)       se      z        p    </span></span>
-<span><span class="co">#&gt; x1   0.15663   1.16956  0.01016 15.423  &lt; 2e-16 ***</span></span>
-<span><span class="co">#&gt; x2  -0.17252   0.84154  0.02231 -7.732 1.06e-14 ***</span></span>
-<span><span class="co">#&gt; x31  0.38262   1.46612  0.05782  6.617 3.65e-11 ***</span></span>
-<span><span class="co">#&gt; x42  0.27524   1.31684  0.09094  3.027  0.00247 ** </span></span>
-<span><span class="co">#&gt; x43  0.29176   1.33878  0.08329  3.503  0.00046 ***</span></span>
-<span><span class="co">#&gt; x44  0.17694   1.19356  0.08220  2.153  0.03136 *  </span></span>
+<span><span class="co">#&gt; x1   0.15663   1.16957  0.01016 15.424  &lt; 2e-16 ***</span></span>
+<span><span class="co">#&gt; x2  -0.17255   0.84152  0.02231 -7.733 1.05e-14 ***</span></span>
+<span><span class="co">#&gt; x31  0.38273   1.46629  0.05782  6.619 3.61e-11 ***</span></span>
+<span><span class="co">#&gt; x42  0.27510   1.31666  0.09094  3.025 0.002486 ** </span></span>
+<span><span class="co">#&gt; x43  0.29164   1.33862  0.08329  3.502 0.000462 ***</span></span>
+<span><span class="co">#&gt; x44  0.17682   1.19341  0.08220  2.151 0.031472 *  </span></span>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span>
 <span><span class="co">#&gt;     exp(coef) exp(-coef) lower .95 upper .95</span></span>
 <span><span class="co">#&gt; x1  1.1696    0.8550     1.1465    1.1931   </span></span>
-<span><span class="co">#&gt; x2  0.8415    1.1883     0.8055    0.8792   </span></span>
-<span><span class="co">#&gt; x31 1.4661    0.6821     1.3090    1.6420   </span></span>
-<span><span class="co">#&gt; x42 1.3168    0.7594     1.1019    1.5738   </span></span>
-<span><span class="co">#&gt; x43 1.3388    0.7469     1.1371    1.5762   </span></span>
-<span><span class="co">#&gt; x44 1.1936    0.8378     1.0160    1.4022</span></span></code></pre></div>
+<span><span class="co">#&gt; x2  0.8415    1.1883     0.8055    0.8791   </span></span>
+<span><span class="co">#&gt; x31 1.4663    0.6820     1.3092    1.6422   </span></span>
+<span><span class="co">#&gt; x42 1.3167    0.7595     1.1017    1.5736   </span></span>
+<span><span class="co">#&gt; x43 1.3386    0.7470     1.1370    1.5760   </span></span>
+<span><span class="co">#&gt; x44 1.1934    0.8379     1.0158    1.4020</span></span></code></pre></div>
 <p>Once the final COLSA estimate is obtained, we can construct survival curves for arbitrary covariate values. As a diagnostic step, we plot the estimated baseline cumulative hazard function and compare it to the true cumulative hazard function used in the data-generating process.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/basehaz.html">basehaz</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span>
@@ -199,7 +197,7 @@
 <div class="developers">
 <h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
-<li>First Last <br><small class="roles"> Author, maintainer </small>  </li>
+<li>First Last <br><small class="roles"> Author, maintainer </small>   </li>
 </ul>
 </div>
 
@@ -222,7 +220,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>
