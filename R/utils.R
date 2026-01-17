@@ -62,18 +62,11 @@ objective <- function(par, time, status, x, boundary, theta, hessian_prev) {
   }
   eta <- x %*% beta
 
-  cbh <- do.call(rbind, lapply(time, function(t) {
-    int_basehaz(t, 0, alpha, n_basis, boundary)
-  }))
-  dcbh <- do.call(rbind, lapply(time, function(t) {
-    int_basehaz(t, 1, alpha, n_basis, boundary)
-  }))
-  d2cbh <- t(sapply(time, function(t) {
-    int_basehaz(t, 2, alpha, n_basis, boundary)
-  }))
-  if (n_basis == 1) {
-    d2cbh <- matrix(d2cbh, ncol = 1)
-  }
+  # Vectorized computation of cumulative baseline hazard and derivatives
+  int_result <- int_basehaz(as.vector(time), alpha, n_basis, boundary)
+  cbh <- matrix(int_result$cbh, ncol = 1)
+  dcbh <- int_result$dcbh
+  d2cbh <- int_result$d2cbh
 
   dalpha <- t(dcbh) %*% exp(eta) - t(b) %*% status
   dbeta <- t(x) %*% (cbh * exp(eta) - status)
@@ -96,71 +89,74 @@ objective <- function(par, time, status, x, boundary, theta, hessian_prev) {
 
 #' Compute Integrated Baseline Hazard and Its Derivatives
 #'
-#' This function computes the integrated baseline hazard or its derivatives
-#' using Gaussian quadrature and Bernstein polynomial basis functions.
+#' Computes the integrated baseline hazard and its derivatives for multiple
+#' time points using Gaussian quadrature and Bernstein polynomial basis.
 #'
-#' @param t Numeric. The upper limit of integration.
-#' @param deriv Integer. Specifies the derivative to compute:
-#'   \itemize{
-#'     \item 0: Computes the cumulative baseline hazard.
-#'     \item 1: Computes the gradient of the cumulative baseline hazard.
-#'     \item 2: Computes the Hessian of the cumulative baseline hazard.
-#'   }
-#' @param alpha Numeric vector. Coefficients for the baseline hazard function.
-#' @param n_basis Integer. The number of Bernstein polynomial basis functions.
-#' @param boundary Numeric vector of length 2. The boundary knots for the
-#' Bernstein polynomials.
-#' @param n_nodes Integer. The number of quadrature nodes to use. Default is 10.
+#' @param times Numeric vector of time points (upper limits of integration).
+#' @param alpha Numeric vector of baseline hazard coefficients.
+#' @param n_basis Integer number of Bernstein polynomial basis functions.
+#' @param boundary Numeric vector of length 2 for boundary knots.
+#' @param n_nodes Integer number of quadrature nodes (default 10).
 #'
-#' @return Numeric. The computed integral or its derivative.
+#' @return A list containing:
+#'   \item{cbh}{Numeric vector of cumulative baseline hazards.}
+#'   \item{dcbh}{Matrix of gradients (n_times x n_basis).}
+#'   \item{d2cbh}{Matrix of vectorized Hessians (n_times x n_basis^2).}
 #'
-#' @details
-#' This function uses Gaussian quadrature to approximate the integral of the
-#' baseline hazard function, which is modeled using Bernstein polynomial basis
-#' functions. The `deriv` parameter determines whether the function computes
-#' the integral itself or its first or second derivative.
-#'
+#' @keywords internal
 #' @importFrom statmod gauss.quad.prob
-int_basehaz <- function(t, deriv, alpha, n_basis, boundary, n_nodes = 10) {
-  if (!is.numeric(t) || t < 0) stop("t must be a non-negative numeric value")
-  if (!is.numeric(deriv) || !(deriv %in% 0:2)) stop("deriv must be 0, 1, or 2")
-  if (!is.numeric(alpha) || length(alpha) != n_basis) {
-    stop("alpha must be a numeric vector of length n_basis")
-  }
-  if (
-    !is.numeric(boundary) || length(boundary) != 2 || boundary[1] >= boundary[2]
-  ) {
-    stop("boundary must be a ordered numeric vector of length 2")
-  }
-  if (!is.numeric(n_nodes) || n_nodes <= 0 || n_nodes != as.integer(n_nodes)) {
-    stop("n_nodes must be a positive integer")
+int_basehaz <- function(times, alpha, n_basis, boundary, n_nodes = 5) {
+  n_times <- length(times)
+
+  # Get quadrature nodes for unit interval [0, 1]
+  quad_unit <- gauss.quad.prob(n_nodes, "uniform", l = 0, u = 1)
+  nodes_unit <- quad_unit$nodes
+  weights_unit <- quad_unit$weights
+
+  # Handle trivial case
+  if (n_basis == 1) {
+    bh_val <- exp(alpha[1])
+    cbh <- times * bh_val
+    dcbh <- matrix(cbh, ncol = 1)
+    d2cbh <- matrix(cbh, ncol = 1)
+    return(list(cbh = cbh, dcbh = dcbh, d2cbh = d2cbh))
   }
 
-  quad <- gauss.quad.prob(n_nodes, "uniform", l = 0, u = t)
-  b <- if (n_basis == 1) {
-    matrix(1, nrow = n_nodes, ncol = 1)
-  } else {
-    splines2::bpoly(
-      quad$nodes,
-      degree = n_basis - 1, intercept = TRUE,
-      Boundary.knots = boundary
-    )
-  }
-  bh <- as.vector(exp(b %*% alpha))
-  if (n_basis == 1) {
-    return(t * sum(quad$weights * bh))
-  }
-  if (deriv == 0) {
-    int <- sum(quad$weights * bh)
-  } else if (deriv == 1) {
-    int <- colSums(sweep(b, 1, quad$weights * bh, "*"))
-  } else if (deriv == 2) {
-    b_outer <- t(sapply(seq_len(n_nodes), function(i) {
-      crossprod(b[i, , drop = FALSE])
-    }))
-    int <- colSums(sweep(b_outer, 1, quad$weights * bh, "*"))
-  }
-  t * int
+  # Create all quadrature nodes: nodes_all[i, j] = times[i] * nodes_unit[j]
+  nodes_all <- outer(times, nodes_unit)
+
+  # Flatten and compute basis functions in one call
+  nodes_flat <- as.vector(t(nodes_all))
+  b_flat <- splines2::bpoly(
+    nodes_flat,
+    degree = n_basis - 1, intercept = TRUE,
+    Boundary.knots = boundary
+  )
+
+  # Compute baseline hazard and weighted values
+  bh_flat <- exp(as.vector(b_flat %*% alpha))
+  w_bh_flat <- bh_flat * rep(weights_unit, n_times)
+
+  # Reshape weighted hazard to n_times x n_nodes
+  w_bh_mat <- matrix(w_bh_flat, nrow = n_times, ncol = n_nodes, byrow = TRUE)
+
+  # cbh: sum of weighted hazard
+  cbh <- times * rowSums(w_bh_mat)
+
+  # Group index for rowsum
+  group_idx <- rep(seq_len(n_times), each = n_nodes)
+
+  # Gradient: use rowsum
+  b_weighted <- b_flat * w_bh_flat
+  dcbh <- rowsum(b_weighted, group_idx) * times
+
+  # Hessian: vectorized outer product
+  b_outer <- b_flat[, rep(seq_len(n_basis), n_basis)] *
+    b_flat[, rep(seq_len(n_basis), each = n_basis)]
+  b_outer_weighted <- b_outer * w_bh_flat
+  d2cbh <- rowsum(b_outer_weighted, group_idx) * times
+
+  list(cbh = cbh, dcbh = dcbh, d2cbh = d2cbh)
 }
 
 #' Proximal Operator (Forward)

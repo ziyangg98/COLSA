@@ -4,37 +4,27 @@
 \alias{int_basehaz}
 \title{Compute Integrated Baseline Hazard and Its Derivatives}
 \usage{
-int_basehaz(t, deriv, alpha, n_basis, boundary, n_nodes = 10)
+int_basehaz(times, alpha, n_basis, boundary, n_nodes = 5)
 }
 \arguments{
-\item{t}{Numeric. The upper limit of integration.}
+\item{times}{Numeric vector of time points (upper limits of integration).}
 
-\item{deriv}{Integer. Specifies the derivative to compute:
-\itemize{
-\item 0: Computes the cumulative baseline hazard.
-\item 1: Computes the gradient of the cumulative baseline hazard.
-\item 2: Computes the Hessian of the cumulative baseline hazard.
-}}
+\item{alpha}{Numeric vector of baseline hazard coefficients.}
 
-\item{alpha}{Numeric vector. Coefficients for the baseline hazard function.}
+\item{n_basis}{Integer number of Bernstein polynomial basis functions.}
 
-\item{n_basis}{Integer. The number of Bernstein polynomial basis functions.}
+\item{boundary}{Numeric vector of length 2 for boundary knots.}
 
-\item{boundary}{Numeric vector of length 2. The boundary knots for the
-Bernstein polynomials.}
-
-\item{n_nodes}{Integer. The number of quadrature nodes to use. Default is 10.}
+\item{n_nodes}{Integer number of quadrature nodes (default 10).}
 }
 \value{
-Numeric. The computed integral or its derivative.
+A list containing:
+\item{cbh}{Numeric vector of cumulative baseline hazards.}
+\item{dcbh}{Matrix of gradients (n_times x n_basis).}
+\item{d2cbh}{Matrix of vectorized Hessians (n_times x n_basis^2).}
 }
 \description{
-This function computes the integrated baseline hazard or its derivatives
-using Gaussian quadrature and Bernstein polynomial basis functions.
+Computes the integrated baseline hazard and its derivatives for multiple
+time points using Gaussian quadrature and Bernstein polynomial basis.
 }
-\details{
-This function uses Gaussian quadrature to approximate the integral of the
-baseline hazard function, which is modeled using Bernstein polynomial basis
-functions. The \code{deriv} parameter determines whether the function computes
-the integral itself or its first or second derivative.
-}
+\keyword{internal}

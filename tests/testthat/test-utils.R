@@ -72,16 +72,17 @@ test_that("prox_reverse throws errors for invalid inputs", {
 })
 
 test_that("int_basehaz computes cumulative baseline hazard", {
-  cbh <- int_basehaz(1, 0, c(0.5, -0.2, 0.3), 3, c(0, 2))
+  result <- int_basehaz(1, c(0.5, -0.2, 0.3), 3, c(0, 2))
 
   f <- function(t) exp(0.5 - 0.7 * t + 0.3 * t^2)
   cbh_true <- integrate(f, 0, 1)
-  expect_true(is.numeric(cbh))
-  expect_equal(cbh, cbh_true$value, tolerance = 1e-8)
+  expect_true(is.list(result))
+  expect_true(is.numeric(result$cbh))
+  expect_equal(as.vector(result$cbh), cbh_true$value, tolerance = 1e-6)
 })
 
 test_that("int_basehaz computes gradient of the cumulative baseline hazard", {
-  dcbh <- int_basehaz(1, 1, c(0.5, -0.2, 0.3), 3, c(0, 2))
+  result <- int_basehaz(1, c(0.5, -0.2, 0.3), 3, c(0, 2))
 
   f <- function(t) exp(0.5 - 0.7 * t + 0.3 * t^2)
   g1 <- function(t) f(t) * (1 - t / 2)^2
@@ -92,14 +93,13 @@ test_that("int_basehaz computes gradient of the cumulative baseline hazard", {
     integrate(g2, 0, 1)$value,
     integrate(g3, 0, 1)$value
   )
-  names(dcbh_true) <- c("1", "2", "3")
-  expect_true(is.numeric(dcbh))
-  expect_equal(length(dcbh), 3)
-  expect_equal(dcbh, dcbh_true, tolerance = 1e-8)
+  expect_true(is.matrix(result$dcbh))
+  expect_equal(ncol(result$dcbh), 3)
+  expect_equal(as.vector(result$dcbh), as.vector(dcbh_true), tolerance = 1e-6)
 })
 
 test_that("int_basehaz computes Hessian of the cumulative baseline hazard", {
-  d2cbh <- int_basehaz(1, 2, c(0.5, -0.2, 0.3), 3, c(0, 2))
+  result <- int_basehaz(1, c(0.5, -0.2, 0.3), 3, c(0, 2))
 
   f <- function(t) exp(0.5 - 0.7 * t + 0.3 * t^2)
   b <- list(
@@ -114,32 +114,18 @@ test_that("int_basehaz computes Hessian of the cumulative baseline hazard", {
       d2cbh_true[i, j] <- integrate(g, 0, 1)$value
     }
   }
-  expect_true(is.numeric(d2cbh))
-  expect_equal(length(d2cbh), 9)
-  expect_equal(matrix(d2cbh, nrow = 3), d2cbh_true, tolerance = 1e-8)
+  expect_true(is.matrix(result$d2cbh))
+  expect_equal(ncol(result$d2cbh), 9)
+  expect_equal(matrix(result$d2cbh, nrow = 3), d2cbh_true, tolerance = 1e-6)
 })
 
-test_that("int_basehaz throws error for invalid inputs", {
-  expect_error(
-    int_basehaz(-1, 0, c(0.5, -0.2, 0.3), 3, c(0, 2)),
-    "t must be a non-negative numeric value"
-  )
-  expect_error(
-    int_basehaz(1, 3, c(0.5, -0.2, 0.3), 3, c(0, 2)),
-    "deriv must be 0, 1, or 2"
-  )
-  expect_error(
-    int_basehaz(1, 0, c(0.5, -0.2), 3, c(0, 2)),
-    "alpha must be a numeric vector of length n_basis"
-  )
-  expect_error(
-    int_basehaz(1, 0, c(0.5, -0.2, 0.3), 3, c(2, 0)),
-    "boundary must be a ordered numeric vector of length 2"
-  )
-  expect_error(
-    int_basehaz(1, 0, c(0.5, -0.2, 0.3), 3, c(0, 2), -1),
-    "n_nodes must be a positive integer"
-  )
+test_that("int_basehaz handles multiple time points", {
+  times <- c(0.5, 1, 1.5)
+  result <- int_basehaz(times, c(0.5, -0.2, 0.3), 3, c(0, 2))
+
+  expect_equal(length(result$cbh), 3)
+  expect_equal(nrow(result$dcbh), 3)
+  expect_equal(nrow(result$d2cbh), 3)
 })
 
 

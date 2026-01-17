@@ -5,7 +5,7 @@
 \title{Collaborative Inference for Cox Proportional Hazards Model in Distributed
 Data}
 \usage{
-colsa(formula, data, n_basis, boundary, scale = 2, ...)
+colsa(formula, data, n_basis, boundary, scale = 2, init = "zero", ...)
 }
 \arguments{
 \item{formula}{A formula object specifying the model. The response must be
@@ -22,6 +22,11 @@ bounds.}
 
 \item{scale}{A numeric value specifying the scaling factor for the number of
 pre-estimation basis functions. Default is 2.0.}
+
+\item{init}{A character string specifying the initialization method.
+\code{"zero"} (default) uses zero initialization for fast computation.
+\code{"flexsurv"} uses \code{flexsurvspline} for better initial values
+but slower computation.}
 
 \item{...}{Additional arguments passed to the optimization function.}
 }

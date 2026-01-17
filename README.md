@@ -56,9 +56,7 @@ Censoring times followed an exponential distribution with rate parameter
 3. The observed event times were subject to right censoring. The true
 regression coefficients were set as
 
-$$
-  \boldsymbol{\beta} = (0.15, -0.15, 0.3, 0.3, 0.3, 0.3)^{\top}
-$$
+$$  \boldsymbol{\beta} = (0.15, -0.15, 0.3, 0.3, 0.3, 0.3)^{\top}$$
 
 A total of six datasets were generated: the first three containing 1,500
 observations each, and the remaining three containing 500 observations
@@ -124,21 +122,21 @@ summary(fit)
 #> Number of basis functions:  5 
 #> 
 #>         coef exp(coef)       se      z        p    
-#> x1   0.15663   1.16956  0.01016 15.423  < 2e-16 ***
-#> x2  -0.17252   0.84154  0.02231 -7.732 1.06e-14 ***
-#> x31  0.38262   1.46612  0.05782  6.617 3.65e-11 ***
-#> x42  0.27524   1.31684  0.09094  3.027  0.00247 ** 
-#> x43  0.29176   1.33878  0.08329  3.503  0.00046 ***
-#> x44  0.17694   1.19356  0.08220  2.153  0.03136 *  
+#> x1   0.15663   1.16957  0.01016 15.424  < 2e-16 ***
+#> x2  -0.17255   0.84152  0.02231 -7.733 1.05e-14 ***
+#> x31  0.38273   1.46629  0.05782  6.619 3.61e-11 ***
+#> x42  0.27510   1.31666  0.09094  3.025 0.002486 ** 
+#> x43  0.29164   1.33862  0.08329  3.502 0.000462 ***
+#> x44  0.17682   1.19341  0.08220  2.151 0.031472 *  
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #>     exp(coef) exp(-coef) lower .95 upper .95
 #> x1  1.1696    0.8550     1.1465    1.1931   
-#> x2  0.8415    1.1883     0.8055    0.8792   
-#> x31 1.4661    0.6821     1.3090    1.6420   
-#> x42 1.3168    0.7594     1.1019    1.5738   
-#> x43 1.3388    0.7469     1.1371    1.5762   
-#> x44 1.1936    0.8378     1.0160    1.4022
+#> x2  0.8415    1.1883     0.8055    0.8791   
+#> x31 1.4663    0.6820     1.3092    1.6422   
+#> x42 1.3167    0.7595     1.1017    1.5736   
+#> x43 1.3386    0.7470     1.1370    1.5760   
+#> x44 1.1934    0.8379     1.0158    1.4020
 ```
 
 Once the final COLSA estimate is obtained, we can construct survival

@@ -34,6 +34,10 @@ Surv <- survival::Surv # nolint: object_name_linter.
 #'   bounds.
 #' @param scale A numeric value specifying the scaling factor for the number of
 #'   pre-estimation basis functions. Default is 2.0.
+#' @param init A character string specifying the initialization method.
+#'   \code{"zero"} (default) uses zero initialization for fast computation.
+#'   \code{"flexsurv"} uses \code{flexsurvspline} for better initial values
+#'   but slower computation.
 #' @param ... Additional arguments passed to the optimization function.
 #'
 #' @return An object of class `"colsa"` containing the following components:
@@ -71,7 +75,7 @@ Surv <- survival::Surv # nolint: object_name_linter.
 #'
 #' @export
 colsa <- function(
-    formula, data, n_basis, boundary, scale = 2.0, ...) {
+    formula, data, n_basis, boundary, scale = 2.0, init = "zero", ...) {
   # Input validation
   if (!inherits(formula, "formula")) stop("formula must be a formula object")
   if (!inherits(data, "data.frame")) stop("data must be a data frame")
@@ -85,6 +89,9 @@ colsa <- function(
   }
   if (!is.numeric(scale) || length(scale) != 1 || scale <= 0) {
     stop("scale must be a positive numeric value")
+  }
+  if (!init %in% c("zero", "flexsurv")) {
+    stop("init must be 'zero' or 'flexsurv'")
   }
 
   # Prepare model frame and extract response and predictors
@@ -101,24 +108,28 @@ colsa <- function(
   n_parameters <- n_basis_pre + n_features
 
   # Initialize the Parameters
-  # Use flexsurvspline for initial fit and extract baseline hazard
-  init_fit <- flexsurv::flexsurvspline(formula, data = data, k = n_basis - 1)
-  bh <- flexsurv::hsurvspline(
-    time, init_fit$coefficients[seq_len(n_basis + 1)],
-    knots = init_fit$knots
-  )
-  b <- if (n_basis == 1) {
-    matrix(1, nrow = length(time), ncol = 1)
-  } else {
-    splines2::bpoly(
-      time,
-      degree = n_basis - 1, intercept = TRUE,
-      Boundary.knots = boundary
+
+  if (init == "flexsurv") {
+    init_fit <- flexsurv::flexsurvspline(formula, data = data, k = n_basis - 1)
+    bh <- flexsurv::hsurvspline(
+      time, init_fit$coefficients[seq_len(n_basis + 1)],
+      knots = init_fit$knots
     )
+    b <- if (n_basis == 1) {
+      matrix(1, nrow = length(time), ncol = 1)
+    } else {
+      splines2::bpoly(
+        time,
+        degree = n_basis - 1, intercept = TRUE,
+        Boundary.knots = boundary
+      )
+    }
+    alpha_init <- stats::lm.fit(b, log(bh))$coefficients
+    beta_init <- init_fit$coefficients[-seq_len(n_basis + 1)]
+    theta_init <- c(alpha_init, beta_init)
+  } else {
+    theta_init <- numeric(n_basis + n_features)
   }
-  alpha_init <- stats::lm.fit(b, log(bh))$coefficients
-  beta_init <- init_fit$coefficients[-seq_len(n_basis + 1)]
-  theta_init <- c(alpha_init, beta_init)
 
   theta <- numeric(n_parameters)
   hessian <- matrix(0, nrow = n_parameters, ncol = n_parameters)
@@ -582,7 +593,7 @@ basehaz.colsa <- function(
   idx <- seq_len(n_basis)
   alpha <- coef[idx]
 
-  cbh <- sapply(time, function(t) int_basehaz(t, 0, alpha, n_basis, boundary))
+  cbh <- int_basehaz(time, alpha, n_basis, boundary)$cbh
 
   hess <- object$hessian
   hess_alpha <- hess[idx, idx, drop = FALSE]
