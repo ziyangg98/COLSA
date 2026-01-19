@@ -15,7 +15,7 @@ int_basehaz(times, alpha, n_basis, boundary, n_nodes = 5)
 
 \item{boundary}{Numeric vector of length 2 for boundary knots.}
 
-\item{n_nodes}{Integer number of quadrature nodes (default 10).}
+\item{n_nodes}{Integer number of quadrature nodes (default 5).}
 }
 \value{
 A list containing:

@@ -24,10 +24,7 @@ coefficients (\code{beta}).}
 \item{hessian_prev}{Numeric matrix of prior Hessian for regularization.}
 }
 \value{
-A list containing:
-\item{value}{Scalar value of the objective function.}
-\item{gradient}{Numeric vector of the gradient of the objective function.}
-\item{hessian}{Numeric matrix of the Hessian of the objective function.}
+A numeric value with attributes \code{gradient} and \code{hessian}.
 }
 \description{
 Computes the objective value, gradient, and Hessian for optimizing a Cox
@@ -37,13 +34,9 @@ proportional hazards model with spline-based baseline hazard estimation.
 The objective function combines two components:
 \itemize{
 \item A regularization term based on prior parameters (\code{theta}) and prior Hessian
-(\code{hessian}).
+(\code{hessian_prev}).
 \item A likelihood-based term for the Cox proportional hazards model, where the
 baseline hazard is modeled using Bernstein polynomials.
 }
-
-The function calculates the loss, gradient, and Hessian for both components
-and combines them to return the overall objective value, gradient, and
-Hessian. The baseline hazard is integrated using helper functions
-(\code{int_basehaz}) to compute cumulative hazard and its derivatives.
 }
+\keyword{internal}

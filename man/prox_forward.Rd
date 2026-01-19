@@ -29,3 +29,4 @@ preserving the mathematical properties of Bernstein polynomials.
 \seealso{
 \code{\link{prox_reverse}}
 }
+\keyword{internal}

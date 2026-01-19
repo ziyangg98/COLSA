@@ -350,8 +350,6 @@ coef.colsa <- function(object, ...) {
   object$theta[-seq_len(n_basis)]
 }
 
-
-
 #' Compute Variance-Covariance Matrix for 'colsa' Objects
 #'
 #' This function computes the variance-covariance matrix for objects of class
@@ -378,7 +376,7 @@ vcov.colsa <- function(object, ...) {
     cbind(prox, matrix(0, nrow(prox), object$n_features)),
     cbind(matrix(0, object$n_features, ncol(prox)), diag(object$n_features))
   )
-  hess <- t(prox) %*% hessian %*% prox
+  hess <- crossprod(prox, hessian) %*% prox
 
   idx <- seq_len(n_basis)
   hess_alpha <- hess[idx, idx, drop = FALSE]
@@ -387,8 +385,28 @@ vcov.colsa <- function(object, ...) {
   hess_bg <- hess[-idx, idx, drop = FALSE]
 
   # Compute the marginal variance-covariance matrix for coefficients
-  hess_prox <- hess_beta - hess_bg %*% solve(hess_alpha) %*% hess_gb
-  solve(hess_prox)
+  # Use Cholesky decomposition for faster matrix inversion
+  chol_alpha <- tryCatch(
+    chol(hess_alpha),
+    error = function(e) NULL
+  )
+  if (!is.null(chol_alpha)) {
+    hess_alpha_inv <- chol2inv(chol_alpha)
+  } else {
+    hess_alpha_inv <- solve(hess_alpha)
+  }
+
+  hess_prox <- hess_beta - hess_bg %*% hess_alpha_inv %*% hess_gb
+
+  chol_prox <- tryCatch(
+    chol(hess_prox),
+    error = function(e) NULL
+  )
+  if (!is.null(chol_prox)) {
+    chol2inv(chol_prox)
+  } else {
+    solve(hess_prox)
+  }
 }
 
 
@@ -443,6 +461,7 @@ BIC.colsa <- function(object, ...) {
   n_parameters <- tail(object$n_basis, 1) + object$n_features
   -2 * logLik(object) + n_parameters * log(object$n_samples)
 }
+
 #' Summarize a 'colsa' Object
 #'
 #' This function provides a summary for objects of class \code{"colsa"}.
@@ -600,7 +619,22 @@ basehaz.colsa <- function(
   hess_beta <- hess[-idx, -idx, drop = FALSE]
   hess_bg <- hess[idx, -idx, drop = FALSE]
   hess_gb <- hess[-idx, idx, drop = FALSE]
-  vcov_alpha <- solve(hess_alpha - hess_bg %*% solve(hess_beta) %*% hess_gb)
+
+  # Use Cholesky decomposition for faster matrix inversion
+  chol_beta <- tryCatch(chol(hess_beta), error = function(e) NULL)
+  hess_beta_inv <- if (!is.null(chol_beta)) {
+    chol2inv(chol_beta)
+  } else {
+    solve(hess_beta)
+  }
+
+  hess_schur <- hess_alpha - hess_bg %*% hess_beta_inv %*% hess_gb
+  chol_schur <- tryCatch(chol(hess_schur), error = function(e) NULL)
+  vcov_alpha <- if (!is.null(chol_schur)) {
+    chol2inv(chol_schur)
+  } else {
+    solve(hess_schur)
+  }
 
   b <- if (n_basis == 1) {
     matrix(1, nrow = length(time), ncol = 1)
