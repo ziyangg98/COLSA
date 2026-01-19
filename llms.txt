@@ -185,12 +185,6 @@ distributed and censored data settings. The shaded region represents the
   Distributed Data
 - [`logLik(`*`<colsa>`*`)`](http://gongziyang.com/COLSA/reference/logLik.colsa.md)
   : Compute Log-Likelihood for 'colsa' Objects
-- [`objective()`](http://gongziyang.com/COLSA/reference/objective.md) :
-  Objective Function for Cox Model Optimization
-- [`prox_forward()`](http://gongziyang.com/COLSA/reference/prox_forward.md)
-  : Proximal Operator (Forward)
-- [`prox_reverse()`](http://gongziyang.com/COLSA/reference/prox_reverse.md)
-  : Proximal Operator (Reverse)
 - [`sim`](http://gongziyang.com/COLSA/reference/sim.md) : Simulated
   Survival Data with Mixed Covariates
 - [`summary(`*`<colsa>`*`)`](http://gongziyang.com/COLSA/reference/summary.colsa.md)

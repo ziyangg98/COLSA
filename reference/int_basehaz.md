@@ -29,7 +29,7 @@ int_basehaz(times, alpha, n_basis, boundary, n_nodes = 5)
 
 - n_nodes:
 
-  Integer number of quadrature nodes (default 10).
+  Integer number of quadrature nodes (default 5).
 
 ## Value
 

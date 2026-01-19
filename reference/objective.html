@@ -80,28 +80,15 @@ coefficients (<code>beta</code>).</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A list containing:</p>
-<dl><dt>value</dt>
-<dd><p>Scalar value of the objective function.</p></dd>
-
-<dt>gradient</dt>
-<dd><p>Numeric vector of the gradient of the objective function.</p></dd>
-
-<dt>hessian</dt>
-<dd><p>Numeric matrix of the Hessian of the objective function.</p></dd>
-
-</dl></div>
+    <p>A numeric value with attributes <code>gradient</code> and <code>hessian</code>.</p>
+    </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>The objective function combines two components:</p><ul><li><p>A regularization term based on prior parameters (<code>theta</code>) and prior Hessian
-(<code>hessian</code>).</p></li>
+(<code>hessian_prev</code>).</p></li>
 <li><p>A likelihood-based term for the Cox proportional hazards model, where the
 baseline hazard is modeled using Bernstein polynomials.</p></li>
-</ul><p>The function calculates the loss, gradient, and Hessian for both components
-and combines them to return the overall objective value, gradient, and
-Hessian. The baseline hazard is integrated using helper functions
-(<code>int_basehaz</code>) to compute cumulative hazard and its derivatives.</p>
-    </div>
+</ul></div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
